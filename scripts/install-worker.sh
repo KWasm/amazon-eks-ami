@@ -26,6 +26,8 @@ validate_env_set BINARY_BUCKET_REGION
 validate_env_set DOCKER_VERSION
 validate_env_set CONTAINERD_VERSION
 validate_env_set RUNC_VERSION
+validate_env_set CRUN_VERSION
+validate_env_set WASMEDGE_VERSION
 validate_env_set CNI_PLUGIN_VERSION
 validate_env_set KUBERNETES_VERSION
 validate_env_set KUBERNETES_BUILD_DATE
@@ -54,6 +56,10 @@ sudo yum update -y
 
 # Install necessary packages
 sudo yum install -y \
+    make automake \
+    autoconf gettext \
+    libtool gcc libcap-devel systemd-devel yajl-devel \
+    glibc-static libseccomp-devel python36 git \
     aws-cfn-bootstrap \
     awscli \
     chrony \
@@ -146,6 +152,18 @@ if [[ "$INSTALL_DOCKER" == "true" ]]; then
     # Enable docker daemon to start on boot.
     sudo systemctl daemon-reload
 fi
+
+################################################################################
+### WasmEdge ###################################################################
+################################################################################
+
+echo "Install WasmEdge..."
+WD=$(pwd)
+cd /tmp
+curl https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | sudo bash -s -- -p /usr/local --version=${WASMEDGE_VERSION}
+git clone --depth 1 --branch ${CRUN_VERSION} https://github.com/containers/crun.git && \
+cd crun && ./autogen.sh && ./configure --with-wasmedge --enable-embedded-yajl --disable-systemd && \
+make && sudo make install && cd $WD && sudo rm -Rf /tmp/crun
 
 ###############################################################################
 ### Containerd setup ##########################################################

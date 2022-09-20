@@ -17,6 +17,13 @@ runtime_type = "io.containerd.runc.v2"
 [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
 SystemdCgroup = true
 
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.crun]
+  # same settings as runc
+  runtime_type = "io.containerd.runc.v2"
+  pod_annotations = ["*.wasm.*", "wasm.*", "module.wasm.image/*", "*.module.wasm.image", "module.wasm.image/variant.*"]
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.crun.options]
+  BinaryName = "crun"
+
 [plugins."io.containerd.grpc.v1.cri".cni]
 bin_dir = "/opt/cni/bin"
 conf_dir = "/etc/cni/net.d"
